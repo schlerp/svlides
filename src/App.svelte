@@ -1,35 +1,130 @@
 <script lang="ts">
   import Slide from "./components/Slide.svelte";
-  console.log("I'm app!");
+  import SlideButton from "./components/SlideButton.svelte";
 
-  let testMarkdown: string = `
-  # Svelte
+  let slides: string[][] = [
+    // ["# TKC", "\nTesting", "\n\nTesting", "\n> 123"],
+    // ["# TKC2", "\nTesting", "\n\nTesting", "\n> 123"],
+    [
+      "# Svelte",
+      "\n\n>Cybernetically enhanced web apps",
+      `
+\`\`\`
 
-Cybernetically enhanced web apps! 
-^
-|
-|
-WTF?
+       WTF?
+       /
+  ¯\\_(ツ)_/¯
+\`\`\``,
+    ],
+    ["# Why?"],
+    [
+      ">The virtual DOM === 🐌",
+      "\n\nIt is pretty cool though...",
+      "\n\n>Do the pro's still outweigh the cons?",
+    ],
+    [
+      ">The virtual DOM turns 🔋",
+      " into 💀",
+      "\n\n<image src='https://c.tenor.com/8iSobq9-6UsAAAAM/dave-tyrone-dave.gif'/>\n\nY'all got any more of them mAh?",
+    ],
+    [
+      "\n\n>React === 🧐",
+      "🤯",
+      "🥔",
+      "\n\n2013 called, they want their framework back",
+      "\n\n<image src='https://resources.stuff.co.nz/content/dam/images/1/k/c/e/s/v/image.related.StuffLandscapeSixteenByNine.1240x700.1keazd.png/1499990640977.jpg?format=pjpg&optimize=medium'/>",
+    ],
+    [
+      "# Vue",
+      "\n\n> Client side CPU cycles = 💀🔋",
+      "\n\nSo? its still better than React right?",
+    ],
+    [
+      "# Enter Svelte\n\n<image src='https://e7.pngegg.com/pngimages/553/714/png-clipart-t-shirt-sunglasses-t-shirt-angle-lens-thumbnail.png' />",
+    ],
+    ["FIN"],
+  ];
 
-* This is a list
-* With two items
-  1. And a sublist
-  2. That is ordered
-    * With another
-    * Sublist inside
+  function clampedIncrement(i: number, array: any[]) {
+    return Math.min(i + 1, array.length - 1);
+  }
 
-| And this is | A table |
-|-------------|---------|
-| With two    | columns |`;
+  function clampedDecrement(i: number, array: any[]) {
+    return Math.max(i - 1, 0);
+  }
+
+  let slideIndex: number = 0;
+  let currentSlide: string[] = slides[slideIndex];
+
+  let contentIndex: number = 0;
+  let currentContent: string = currentSlide[contentIndex];
+
+  function buildMarkdown(i: number) {
+    // whaddup, we is teh functional programmer now ¯\_(ツ)_/¯
+    return currentSlide.reduce(
+      (previousValue: string, currentValue: string, currentIndex: number) => {
+        return currentIndex <= contentIndex
+          ? previousValue.concat(currentValue)
+          : previousValue;
+      }
+    );
+  }
+
+  function resetSlideStatus() {
+    currentSlide = slides[slideIndex];
+    contentIndex = 0;
+    currentContent = buildMarkdown(contentIndex);
+  }
+
+  function slideButtonNotify(event) {
+    if (event.detail === "forward") {
+      slideIndex = clampedIncrement(slideIndex, slides);
+    } else if (event.detail === "backward") {
+      slideIndex = clampedDecrement(slideIndex, slides);
+    }
+    resetSlideStatus();
+  }
+
+  function handleClick(event: MouseEvent) {
+    event.preventDefault();
+    if (event.button === 0) {
+      contentIndex = clampedIncrement(contentIndex, currentSlide);
+    } else if (event.button === 2) {
+      contentIndex = clampedDecrement(contentIndex, currentSlide);
+    }
+    currentContent = buildMarkdown(contentIndex);
+  }
+
+  function handleScroll(event: WheelEvent) {
+    event.preventDefault();
+    if (event.deltaY < 0) {
+      slideIndex = clampedIncrement(slideIndex, slides);
+    } else if (event.deltaY > 0) {
+      slideIndex = clampedDecrement(slideIndex, slides);
+    }
+    resetSlideStatus();
+  }
 </script>
 
-<main>
-  <!-- <h1>derp</h1>
-  <p>herp</p> -->
-  <Slide markdown={testMarkdown} />
+<main
+  on:click={handleClick}
+  on:contextmenu={handleClick}
+  on:wheel={handleScroll}
+>
+  <SlideButton
+    on:slideButtonNotify={slideButtonNotify}
+    buttonDirection="backward"
+  />
+  <Slide markdown={currentContent} />
+  <SlideButton
+    on:slideButtonNotify={slideButtonNotify}
+    buttonDirection="forward"
+  />
 </main>
 
 <style>
+  @import url("https://fonts.googleapis.com/css2?family=Montserrat&family=Raleway&display=swap");
+
   :global(:root) {
     --pal-primary: #fe7f2d;
     --pal-secondary: #619b8a;
@@ -46,14 +141,64 @@ WTF?
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    color: var(--pal-secondary);
+    transition: all 300ms;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  :global(h1, h2, h3, h4, h5, h6, p, code) {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 
   :global(h1, h2, h3, h4, h5, h6) {
-    font-family: "Raleway", sans-serif;
+    font-family: "Montserrat", sans-serif;
     color: var(--pal-primary);
   }
+
+  :global(h1) {
+    font-size: 6rem;
+  }
+  :global(h2) {
+    font-size: 5rem;
+  }
+  :global(h3) {
+    font-size: 4rem;
+  }
+  :global(h4) {
+    font-size: 3rem;
+  }
+  :global(h5) {
+    font-size: 2rem;
+  }
+  :global(h6) {
+    font-size: 1rem;
+  }
+  :global(img) {
+    max-height: 50%;
+    max-width: 50%;
+    border-radius: 1em;
+  }
+
   :global(p) {
     font-family: "Raleway", sans-serif;
-    color: var(--pal-secondary);
+    color: inherit;
+    font-size: 2rem;
+  }
+
+  :global(code) {
+    font-size: 2rem;
+  }
+
+  :global(blockquote) {
+    color: var(--pal-highlight);
+  }
+  :global(blockquote > p) {
+    font-size: 3rem;
   }
 </style>
