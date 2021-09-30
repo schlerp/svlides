@@ -37,7 +37,8 @@
     [
       "# Vue",
       "\n\n> Client side CPU cycles = 💀🔋",
-      "\n\nSo? its still better than React right?",
+      "\n\nSo? its still better than React right? Smart diffing FTW!",
+      "> Bundle sizes = ",
     ],
     [
       "# Enter Svelte\n\n<image src='https://e7.pngegg.com/pngimages/553/714/png-clipart-t-shirt-sunglasses-t-shirt-angle-lens-thumbnail.png' />",
